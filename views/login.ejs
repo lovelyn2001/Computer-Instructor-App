@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= role %> Login</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="center">
+        <h1><%= role %> Login</h1>
+        <form action="/<%= role.toLowerCase() %>/login" method="POST">
+            <% if (role === 'Student') { %>
+                <label for="">Registration Number
+                <input type="text" name="regNumber" placeholder="Registration Number" required>
+            </label>
+            <label for="">Password
+                <input type="password" name="password" placeholder="Password" required>
+            </label>
+            <% } else { %>
+                <label for="">Password
+                <input type="password" name="password" placeholder="Password" required>
+            </label>
+            <% } %>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>
