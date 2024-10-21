@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
+const flash = require('connect-flash');
 const port = process.env.PORT || 4000;
 
 const app = express();
@@ -14,15 +15,28 @@ const app = express();
 // Set view engine
 app.set('view engine', 'ejs');
 
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(fileUpload());
+
+
 app.use(session({
     secret: 'secret',
     resave: false,
     saveUninitialized: true
 }));
+
+// Middleware for flash messages
+app.use(flash());
+
+// Middleware to expose flash messages
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    next();
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -150,17 +164,25 @@ app.get('/instructorDashboard', (req, res) => {
 
 app.post('/instructor/upload', async (req, res) => {
     if (!req.session.instructor) return res.redirect('/instructor/login');
+
     const { courseTitle, courseCode, fileTitle, instructorName } = req.body;
     const file = req.files.file;
     const filePath = path.join(__dirname, 'public/uploads', file.name);
     
     file.mv(filePath, async (err) => {
-        if (err) return res.status(500).send(err);
+        if (err) {
+            req.flash('error_msg', 'File upload failed. Please try again.'); // Flash error message
+            return res.redirect('/instructorDashboard');
+        }
+
         const newFile = new Instructor({ name: instructorName, courseTitle, courseCode, fileTitle, filePath: '/uploads/' + file.name });
         await newFile.save();
-        res.redirect('/instructorDashboard');
+        
+        req.flash('success_msg', 'File uploaded successfully!'); // Flash success message
+        res.redirect('/instructorDashboard'); // Redirect to dashboard
     });
 });
+
 
 // File Download
 app.get('/download/:id', async (req, res) => {

@@ -7,6 +7,14 @@
 <body>
     <div class="center">
         <h1>Upload a File</h1>
+            
+    <% if (success_msg.length > 0) { %>
+        <div class="alert alert-success"><%= success_msg %></div>
+    <% } %>
+    <% if (error_msg.length > 0) { %>
+        <div class="alert alert-danger"><%= error_msg %></div>
+    <% } %>
+    
         <form action="/instructor/upload" method="POST" enctype="multipart/form-data">
             <input type="text" name="courseTitle" placeholder="Course Title" required>
             <input type="text" name="courseCode" placeholder="Course Code" required>
